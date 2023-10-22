@@ -4,39 +4,45 @@ const pdf = require("pdf-parse");
 const filePath = "./files/text.pdf";
 const filePath2 = "./files/text2.pdf";
 
-class LanguageClassifier {
-    constructor(threshold, maxWordLength) {
-        this.threshold = threshold;
+class ShortWordsModel {
+    constructor(maxWordLength) {
         this.maxWordLength = maxWordLength;
         this.languages = {};
     }
 
-    train(language, text) {
-        const words = text.split(/\s+/);
+    train(trainingData) {
+        console.log(trainingData);
 
-        if (!this.languages[language]) {
-            this.languages[language] = {
-                totalWords: 0,
-                wordCounts: {},
-            };
-        }
+        for (let language in trainingData) {
+            trainingData[language].forEach((text) => {
+                const words = text.split(" ");
 
-        const languageData = this.languages[language];
+                if (!this.languages[language]) {
+                    this.languages[language] = {
+                        totalWords: 0,
+                        wordCounts: {},
+                    };
+                }
 
-        for (const word of words) {
-            if (word.length <= this.maxWordLength) {
-                languageData.totalWords++;
-                languageData.wordCounts[word] =
-                    (languageData.wordCounts[word] || 0) + 1;
-            }
+                const languageData = this.languages[language];
+                for (const word of words) {
+                    if (word.length <= this.maxWordLength) {
+                        languageData.totalWords++;
+                        languageData.wordCounts[word] =
+                            (languageData.wordCounts[word] || 0) + 1;
+                    }
+                }
+            });
         }
     }
 
-    classify(text) {
+    detect(text) {
         const words = text.split(/\s+/);
 
-        let maxProbability = -1;
-        let predictedLanguage = null;
+        let scores = {
+            "english": 0.0,
+            "russian": 0.0
+        };
 
         for (const language in this.languages) {
             let probability = 1;
@@ -52,37 +58,74 @@ class LanguageClassifier {
                 }
             }
 
-            if (probability > maxProbability) {
-                maxProbability = probability;
-                predictedLanguage = language;
-            }
+            scores[language] = probability;
         }
 
-        return predictedLanguage;
+        return scores;
+    }
+
+    save(filename) {
+        return false;
+    }
+
+    load(filename) {
+        return false;
     }
 }
 
-const classifier = new LanguageClassifier(3, 5);
+const classifier = new ShortWordsModel(5);
 
 async function processPdf(filePath, language) {
     const dataBuffer = fs.readFileSync(filePath);
     
-    const data = await pdf(dataBuffer);
-    classifier.train(language, data.text.replace(/\n/g, "", language));
+    return await pdf(dataBuffer);
 }
 
 (async () => {
-    await processPdf(filePath, "russian");
-    await processPdf(filePath2, "english");
+    let russianTexts = await processPdf(filePath, "russian");
+    let englishTexts = await processPdf(filePath2, "english");
+
+    classifier.train({
+        "russian" : [russianTexts.text.replace(/\n/g, "")],
+        "english" : [englishTexts.text.replace(/\n/g, "")],
+    });
 
     // Теперь можно классифицировать текст
-    const textToClassify = "Song";
-    const predictedLanguage = classifier.classify(textToClassify);
+    const textToClassify = "Song was good enough!";
+    const predictedLanguage = classifier.detect(textToClassify);
 
-    console.log(`Predicted language: ${predictedLanguage}`);
+    console.log(predictedLanguage);
 })();
 
+let detectLanguageSW = (document) => {
+    const modelFilename = "swmodel.json"
+    let model = ShortWordsModel();
+    
+    if (! model.load(modelFilename)) {
+        model.train(getTrainingData());
+        model.save(modelFilename);
+    }
 
+    let evaluation = model.detect(document);
+
+    let result = null;
+    for (let language in evaluation) {
+        if (result == null) {
+            result = language;
+            continue;
+        }
+
+        if (evaluation[language] > evaluation[result]) {
+            result = language;
+        }
+    }
+
+    return {
+        language: result,
+        probability: evaluation[result],
+        text: document
+    };
+}
 
 // Пример использования:
 

@@ -1,6 +1,6 @@
 const brain = require("brain.js");
-const natural = require("natural");
-const tokenizer = new natural.WordTokenizer();
+// const natural = require("natural");
+// const tokenizer = new natural.WordTokenizer();
 const fs = require("fs");
 const pdf = require("pdf-parse");
 
@@ -27,7 +27,7 @@ async function processPdf(filePath, language) {
     net.train(
         xTrain, // Входные данные
         {
-            iterations: 10000, // Количество итераций обучения
+            iterations: 1000, // Количество итераций обучения
             errorThresh: 0.005, // Порог ошибки
             log: true, // Выводить прогресс обучения
             logPeriod: 100, // Частота вывода прогресса
@@ -38,6 +38,7 @@ async function processPdf(filePath, language) {
     };
     const result = net.run(xInput);
     
+    console.log(result);
     // 4. Выбор категории
     const maxCategory = Math.max(...Object.values(result));
     console.log(result)
@@ -49,12 +50,39 @@ async function processPdf(filePath, language) {
     
 })();
 
+class NeuralNetworkModel {
+    constructor() {
+        this.net = new brain.NeuralNetwork();
+    }
+
+    train(trainingData) {
+        for (let language in trainingData) {
+            trainingData[language].array.forEach(text => {
+                net.train(
+                    {input: text, output: { language: 1 }}, // Входные данные
+                    {
+                        iterations: 10000, // Количество итераций обучения
+                        errorThresh: 0.005, // Порог ошибки
+                        log: true, // Выводить прогресс обучения
+                        logPeriod: 100, // Частота вывода прогресса
+                    }
+                );
+            });
+        }
+    }
+
+    detect(document) {
+        return this.net.run({input: document});
+    }
+
+    save(filename, data) {
+        return false;
+    }
+
+    load(filename) {
+        return false;
+    }
+}
+
 
 console.log(xTrain)
-
-
-
-// 3. Построение профиля для каждого входного документа
-// Предположим, что у вас есть входной документ xInput.
-// xInput - предварительно обработанный входной документ
-
