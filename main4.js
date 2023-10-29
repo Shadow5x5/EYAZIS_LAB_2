@@ -47,7 +47,6 @@ async function processPdf(filePath, language) {
     );
     
     console.log(`Документ классифицирован как: ${resultCategory}`);
-    
 })();
 
 class NeuralNetworkModel {

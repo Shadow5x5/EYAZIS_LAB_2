@@ -8,7 +8,9 @@ const pdfFolderEng = path.join("./files", "eng");
 const getTextFromPdf = async (filePath) => {
     const dataBuffer = fs.readFileSync(filePath);
     const data = await pdf(dataBuffer);
-    return data.text.replace(/\n/g, "");
+    // console.log(data.text.replace(/-/g, ""));
+    // return data.text.replace(/\n/g, "");
+    return data.text.replace(/-/g, "");
 };
 
 const processFolder = async (folderPath, language) => {
@@ -30,7 +32,8 @@ const processPdfFolders = async () => {
         const engData = await processFolder(pdfFolderEng, "eng");
 
         const result = { ...ruData, ...engData };
-        console.log(result);
+        // console.log(result);
+        return result;
     } catch (error) {
         console.error(error);
     }

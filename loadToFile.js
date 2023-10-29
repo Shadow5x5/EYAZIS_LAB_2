@@ -6,7 +6,7 @@ function loadJsonData(filePath="data.json") {
         const jsonData = fs.readFileSync(filePath, "utf8");
         return JSON.parse(jsonData);
     } catch (error) {
-        console.error("Произошла ошибка при чтении файла:", error);
+        // console.error("Произошла ошибка при чтении файла:", error);
         return null;
     }
 }
