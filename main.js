@@ -245,7 +245,6 @@ class NeuralNetworkModel {
     }
 }
 
-
 // Определить язык методом ЧАСТОТНЫХ СЛОВ
 // documents - текста, для которых происходить определение языка
 let detectLanguageFW = async (document) => {
