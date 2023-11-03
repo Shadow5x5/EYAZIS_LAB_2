@@ -352,11 +352,13 @@ let detectLanguage = async (document) => {
 
     for (let evaluation of detectionResults) {
         languages[evaluation.language] = languages[evaluation.language] || 0 + evaluation.probability;
-        
+        languages[evaluation.language + "count"] = languages[evaluation.language + "count"] || 0 + 1;
+
         if (resultLanguage == null) {
             resultLanguage = evaluation.language;
         } else if (
-            languages[resultLanguage] < languages[evaluation.language] ) {
+            languages[resultLanguage] / languages[resultLanguage + "count"] < 
+            languages[evaluation.language] / languages[evaluation.language + "count"]) {
             resultLanguage = evaluation.language;
         }
 
@@ -364,50 +366,9 @@ let detectLanguage = async (document) => {
 
     return {
         language: resultLanguage,
-        probability: languages[resultLanguage],
+        probability: languages[resultLanguage] / languages[resultLanguage + "count"],
         text: document
     };
 }
 
-let main = async () => {
-    let toClassify = `Goat, any ruminant and hollow-horned mammal belonging to the genus
-    Capra. Related to the sheep, the goat is lighter of build, has horns that arch
-    backward, a short tail, and straighter hair. Male goats, called bucks or billys,
-    usually have a beard. Females are called does or nannys, and immature goats
-    are called kids. Wild goats include the ibex and markhor.
-    domestic goat domestic goat Know about the mating behavior of the Persian
-    Ibex of the Caucasus mountains Know about the mating behavior of the Persian
-    Ibex of the Caucasus mountainsSee all videos for this article Domesticated goats
-    are descended from the pasang (Capra aegagrus), which is probably native to
-    Asia, the earliest records being Persian. In China, Great Britain, Europe, and
-    North America, the domestic goat is primarily a milk producer, with a large
-    portion of the milk being used to make cheese. One or two goats will supply
-    sufficient milk for a family throughout the year and can be maintained in small
-    quarters, where it would be uneconomical to keep a cow. For large-scale milk
-    production, goats are inferior to cattle in the temperate zone but superior in
-    the torrid and frigid zones. Goat flesh is edible, that from young kids being
-    quite tender and more delicate in flavour than lamb, which it resembles. Some
-    breeds, notably the Angora and Cashmere, are raised for their wool (see also
-    wool; cashmere; Angora goat); young goats are the source of kid leather.
-    Goats are sociable animals and therefore become depressed if they are separated or isolated from their companions, however they are not flock-orientated
-    like sheep.
-    They are one of the cleanliest animals and are much more selective feeders
-    than cows, sheep, pigs, swine and even dogs.
-    Goats are very intelligent and curious animals. Their inquisitive nature is exemplified in their constant desire to explore and investigate anything unfamiliar
-    which they come across.
-    They communicate with each other by bleating. Mothers will often call to
-    their young (kids) to ensure they stay close-by. Mother and kid goats recognise
-    each other’s calls soon after the mothers give birth.
-    They are very picky eaters. They have very sensitive lips, which they use to
-    “mouth” things in search of clean and tasty food. They will often refuse to eat
-    hay that has been walked on or lying around loose for a day.
-    Goats use the sneeze sound as an alarm. They use a sneeze to warn each
-    other of danger, whether real or imagined.
-    They are extremely intelligent and curious and are very often not given credit
-    for being the smart and loving creatures they actually are.
-    1`
-
-    console.log(await detectLanguage(toClassify))
-}
-
-main();
+module.exports = {detectLanguage};
