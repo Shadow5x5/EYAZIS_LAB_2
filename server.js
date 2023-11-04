@@ -38,7 +38,7 @@ app.post("/", upload.single("file"), async (req, res) => {
         const text = content.text;
         let result;
         try {
-            result = await detectLanguage(text.replace(/\n/g, ''));
+            result = await detectLanguage(text);
         } catch (error) {
             console.error(error);
             return res.status(500).send("Error detecting language");

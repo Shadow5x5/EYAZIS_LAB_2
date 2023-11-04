@@ -351,7 +351,7 @@ let detectLanguage = async (document) => {
     let resultLanguage = null;
 
     for (let evaluation of detectionResults) {
-        languages[evaluation.language] = languages[evaluation.language] || 0 + evaluation.probability;
+        languages[evaluation.language] = (languages[evaluation.language] || 0) + evaluation.probability;
         
         if (resultLanguage == null) {
             resultLanguage = evaluation.language;
@@ -364,7 +364,7 @@ let detectLanguage = async (document) => {
 
     return {
         language: resultLanguage,
-        probability: languages[resultLanguage],
+        probability: Math.min(languages[resultLanguage], 1.0),
         text: document
     };
 }
