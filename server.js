@@ -43,14 +43,6 @@ app.post("/", upload.single("file"), async (req, res) => {
             console.error(error);
             return res.status(500).send("Error detecting language");
         }
-        // Удаление файла
-        fs.unlink(filePath, (err) => {
-            if (err) {
-                console.error("Error deleting file", err);
-            } else {
-                console.log("File deleted successfully");
-            }
-        });
         res.send(result);
     });
 });
