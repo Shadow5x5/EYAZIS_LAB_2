@@ -1,8 +1,9 @@
 import axios from "axios";
 import { useState } from "react";
-
+import "./style.css";
 function App() {
     const [selectedFile, setSelectedFile] = useState(null);
+    const [data, setData] = useState({});
     const handleFileChange = (event) => {
         setSelectedFile(event.target.files[0]);
     };
@@ -23,6 +24,7 @@ function App() {
                 );
 
                 console.log("File uploaded successfully", response);
+                setData(response);
             } catch (error) {
                 console.error("Error uploading file", error);
             }
@@ -34,7 +36,28 @@ function App() {
         <div className="App">
             <input type="file" onChange={handleFileChange} />
             <button onClick={handleUpload}>Отправить</button>
-            <p></p>
+            <p>
+                {data && data.data
+                    ? `Language: ${
+                          data.data.language === "ru"
+                              ? "Russian"
+                              : data.data.language === "eng"
+                              ? "English"
+                              : "Unknown"
+                      }, Probability: ${data.data.probability}, Text: ${
+                          data.data.text
+                      }`
+                    : "Значение еще не заполнено"}
+            </p>
+            <div className="containerHelp">
+                <img src="./help_icon.svg" alt=""/>
+                <p className="help">
+                    Для выбора языка, на который написан данный текст, вам
+                    следует просмотреть каталоги в нашей системе, нажать кнопку
+                    "Отправить" и дождаться результатов. Система оценит
+                    насколько точно вы выбрали язык и переведенный текст.
+                </p>
+            </div>
         </div>
     );
 }
