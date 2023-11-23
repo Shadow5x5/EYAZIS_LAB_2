@@ -3,6 +3,7 @@ import { useState } from "react";
 import "./style.css";
 function App() {
     const [selectedFile, setSelectedFile] = useState(null);
+    const [open, setOpen] = useState(false);
     const [data, setData] = useState({});
     const handleFileChange = (event) => {
         setSelectedFile(event.target.files[0]);
@@ -25,6 +26,7 @@ function App() {
 
                 console.log("File uploaded successfully", response);
                 setData(response);
+                setOpen(true);
             } catch (error) {
                 console.error("Error uploading file", error);
             }
@@ -36,6 +38,32 @@ function App() {
         <div className="App">
             <input type="file" onChange={handleFileChange} />
             <button onClick={handleUpload}>Отправить</button>
+            <div>
+                {open && (
+                    <span>
+                        Функция частотных слов Язык:{" "}
+                        {data.data.resultFW.language} Вероятность:{" "}
+                        {data.data.resultFW.probability}
+                    </span>
+                )}
+            </div>
+            <div>
+                {open && (
+                    <span>
+                        Функция коротких слов Язык:{" "}
+                        {data.data.resultSW.language} Вероятность:{" "}
+                        {data.data.resultSW.probability}
+                    </span>
+                )}
+            </div>
+            <div>
+                {open && (
+                    <span>
+                        Нейронная функция Язык: {data.data.resultNN.language}{" "}
+                        Вероятность: {data.data.resultNN.probability}
+                    </span>
+                )}
+            </div>
             <p>
                 {data && data.data
                     ? `Language: ${
@@ -50,12 +78,15 @@ function App() {
                     : "Значение еще не заполнено"}
             </p>
             <div className="containerHelp">
-                <img src="./help_icon.svg" alt=""/>
+                <img src="./help_icon.svg" alt="" />
                 <p className="help">
-                    Для выбора языка, на который написан данный текст, вам
-                    следует просмотреть каталоги в нашей системе, нажать кнопку
-                    "Отправить" и дождаться результатов. Система оценит
-                    насколько точно вы выбрали язык и переведенный текст.
+                    Система автоматически определяет язык текста. Для получения
+                    результата следует выбрать файл PDF из вашей системы в любом
+                    каталоге, загрузить его и нажать кнопку "Отправить". После
+                    этого ожидайте результатов вычислений. Ниже изображена
+                    графика нейронной сети, которая осуществляет определение
+                    данного результата.
+                    <img src="./svgNet.jpg" alt="" />
                 </p>
             </div>
         </div>
