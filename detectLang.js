@@ -1,5 +1,6 @@
 const brain = require("brain.js");
 
+
 const { saveVariableAsJson } = require("./saveToFile.js");
 const { loadJsonData } = require("./loadToFile.js");
 const { processPdfFolders } = require("./getTrainingData.js");
@@ -243,6 +244,8 @@ class NeuralNetworkModel {
         
         return false;
     }
+
+    
 }
 
 // Определить язык методом ЧАСТОТНЫХ СЛОВ

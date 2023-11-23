@@ -6,7 +6,7 @@ const { processPdfFolders } = require("./getTrainingData.js");
 
 let getTrainingData = () => {
     return processPdfFolders();
-}
+};
 
 class FrequentWordsModel {
     constructor() {
@@ -118,11 +118,13 @@ class ShortWordsModel {
                 if (word.length <= this.maxWordLength) {
                     let processedWord = word.toLowerCase();
 
-                    if (! visitedWords.includes(processedWord)) {
+                    if (!visitedWords.includes(processedWord)) {
                         visitedWords.push(processedWord);
 
                         const wordCount =
-                            this.languages[language].wordCounts[processedWord] || 0;
+                            this.languages[language].wordCounts[
+                                processedWord
+                            ] || 0;
                         const wordProbability =
                             wordCount / this.languages[language].totalWords;
 
@@ -154,14 +156,18 @@ class ShortWordsModel {
 
 class NeuralNetworkModel {
     constructor() {
-        this.net = new brain.NeuralNetworkGPU({activation: "sigmoid", hiddenLayers: [], learningRate: 0.007});
+        this.net = new brain.NeuralNetworkGPU({
+            activation: "sigmoid",
+            hiddenLayers: [],
+            learningRate: 0.007,
+        });
         this.dictionary = [];
     }
 
     countNgrams(document) {
         let words = document.match(/[a-zA-Zа-яА-Я]+/g).join("");
         let trigramms = {};
-        for (let i = 0; i <= words.length - 3; i ++) {
+        for (let i = 0; i <= words.length - 3; i++) {
             let gramm = words.substring(i, i + 3);
             trigramms[gramm] = (trigramms[gramm] || 0) + 1;
         }
@@ -179,24 +185,29 @@ class NeuralNetworkModel {
         for (let language in trainingData) {
             let trigramms = {};
 
-            trainingData[language].forEach(text => {
+            trainingData[language].forEach((text) => {
                 let words = text.match(/[a-zA-Zа-яА-Я]+/g).join("");
 
-                for (let i = 0; i <= words.length - 3; i ++) {
+                for (let i = 0; i <= words.length - 3; i++) {
                     let gramm = words.substring(i, i + 3);
                     trigramms[gramm] = (trigramms[gramm] || 0) + 1;
                 }
             });
 
-            this.dictionary = this.dictionary.concat(Object.keys(trigramms).sort(
-                (a, b) => trigramms[b] - trigramms[a]
-            ).slice(0, Math.min(1000, Object.keys(trigramms).length * 0.5))); // .slice(0, 100 > Object.keys(trigramms).length ? Object.keys(trigramms).length : 0.1 * Object.keys(trigramms).length));
+            this.dictionary = this.dictionary.concat(
+                Object.keys(trigramms)
+                    .sort((a, b) => trigramms[b] - trigramms[a])
+                    .slice(
+                        0,
+                        Math.min(1000, Object.keys(trigramms).length * 0.5)
+                    )
+            ); // .slice(0, 100 > Object.keys(trigramms).length ? Object.keys(trigramms).length : 0.1 * Object.keys(trigramms).length));
         }
 
         // Then count all ngramms in each text
         let toTrain = [];
         for (let language in trainingData) {
-            trainingData[language].forEach(text => {
+            trainingData[language].forEach((text) => {
                 let trainInput = this.countNgrams(text).slice();
 
                 let trainEntry = {};
@@ -204,9 +215,7 @@ class NeuralNetworkModel {
                 let trainLanguage = {};
                 trainLanguage[language] = 1.0;
                 trainEntry.output = trainLanguage;
-                toTrain.push(
-                    trainEntry
-                );
+                toTrain.push(trainEntry);
             });
         }
 
@@ -226,7 +235,7 @@ class NeuralNetworkModel {
     }
 
     save(filename) {
-        saveVariableAsJson(this.dictionary, `dictionaryOf${filename}`)
+        saveVariableAsJson(this.dictionary, `dictionaryOf${filename}`);
         saveVariableAsJson(this.net.toJSON(), filename);
     }
 
@@ -240,7 +249,7 @@ class NeuralNetworkModel {
                 return true;
             }
         }
-        
+
         return false;
     }
 }
@@ -344,30 +353,32 @@ let detectLanguage = async (document) => {
     detectionResults.push(
         await detectLanguageFW(document),
         await detectLanguageSW(document),
-        await detectLanguageNN(document),
-    )
+        await detectLanguageNN(document)
+    );
 
     let languages = {};
     let resultLanguage = null;
 
     for (let evaluation of detectionResults) {
-        languages[evaluation.language] = (languages[evaluation.language] || 0) + evaluation.probability;
-        
+        languages[evaluation.language] =
+            (languages[evaluation.language] || 0) + evaluation.probability;
+
         if (resultLanguage == null) {
             resultLanguage = evaluation.language;
-        } else if (
-            languages[resultLanguage] < languages[evaluation.language] ) {
+        } else if (languages[resultLanguage] < languages[evaluation.language]) {
             resultLanguage = evaluation.language;
         }
-
     }
 
     return {
         language: resultLanguage,
         probability: Math.min(languages[resultLanguage], 1.0),
-        text: document
+        text: document,
+        resultFW: detectionResults[0],
+        resultSW: detectionResults[1],
+        resultNN: detectionResults[2],
     };
-}
+};
 
 // let main = async () => {
 //     let toClassify = `Goat, any ruminant and hollow-horned mammal belonging to the genus
@@ -412,4 +423,9 @@ let detectLanguage = async (document) => {
 
 // main();
 
-module.exports = {detectLanguage, detectLanguageFW, detectLanguageNN, detectLanguageSW}
+module.exports = {
+    detectLanguage,
+    detectLanguageFW,
+    detectLanguageNN,
+    detectLanguageSW,
+};
